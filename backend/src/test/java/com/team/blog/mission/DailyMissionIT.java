@@ -86,7 +86,7 @@ class DailyMissionIT extends IntegrationTestBase {
         assertThat(page("/missions", stranger)).doesNotContain("오늘의 미션 글");
         assertThat(page("/missions", null)).doesNotContain("오늘의 미션 글");
         // 내 기록과 글 화면 표시
-        assertThat(page("/missions", writer)).contains("1번").contains("🔥 1일").contains("오늘 미션 완료");
+        assertThat(page("/missions", writer)).contains("1번").contains("1일 연속").contains("오늘 미션 완료");
         // 066 배지: 첫 미션만 받음, 나머지는 받는 법이 보인다. 로그인 안 한 사람에게는 배지 칸이 없다
         assertThat(page("/missions", writer)).contains("내 배지").contains("1 / 7").contains("첫 미션").contains("받았어요")
                 .contains("3일 연속 완료하면");

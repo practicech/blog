@@ -118,7 +118,7 @@
                 <strong th:if="${postMission.countedOnDay()}">오늘 미션 완료!</strong>
                 <strong th:unless="${postMission.countedOnDay()}">주제가 나온 날이 지나 올린 글이라 완료로 세지 않았어요.</strong>
                 <p class="mission-done-stats">
-                    <span class="streak-chip" th:text="${'🔥 ' + missionStats.streak() + '일 연속'}">🔥 1일 연속</span>
+                    <span class="streak-chip"><svg th:replace="~{fragments/icons :: jandi-line}"></svg> <th:block th:text="${missionStats.streak() + '일 연속'}">1일 연속</th:block></span>
                     <span class="help" th:text="${'지금까지 ' + missionStats.total() + '번'}">지금까지 1번</span>
                 </p>
             </div>

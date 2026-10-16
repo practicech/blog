@@ -15,7 +15,7 @@
             <p class="mission-lead" th:if="${isToday}">좋아하는 주제 하나를 골라 글을 써 보세요.<br>작은 기록이 모여, 멋진 이야기가 될 거예요.</p>
             <p class="mission-lead" th:unless="${isToday}">그날의 주제와 글이에요. 미션은 그날 안에 쓴 글만 완료로 세요.</p>
             <p class="mission-today-state" th:if="${isToday and myStats != null}" th:classappend="${myStats.doneToday()} ? 'is-done'">
-                <span class="streak-chip" th:if="${myStats.streak() > 0}" th:text="${'🔥 ' + myStats.streak() + '일 연속'}">🔥 1일 연속</span>
+                <span class="streak-chip" th:if="${myStats.streak() > 0}"><svg th:replace="~{fragments/icons :: jandi-line}"></svg> <th:block th:text="${myStats.streak() + '일 연속'}">1일 연속</th:block></span>
                 <th:block th:if="${myStats.doneToday()}">🎉 오늘 미션 완료!
                     <a th:if="${myTodayPost != null}" th:href="${myTodayPost.url()}" th:text="${'「' + myTodayPost.title() + '」'}">내 글</a></th:block>
                 <th:block th:unless="${myStats.doneToday()}">아직 오늘 미션을 안 했어요</th:block>
@@ -25,7 +25,7 @@
         <ul class="mission-tiles" th:if="${myStats != null}" aria-label="내 미션 기록">
             <li class="mission-tile tone-sand"><span class="mission-tile-icon" aria-hidden="true">✏️</span><span class="help">누적 미션</span>
                 <strong th:text="${myStats.total() + '번'}">0번</strong><span class="help" th:text="${'최고 ' + myStats.best() + '일 연속'}">최고 0일 연속</span></li>
-            <li class="mission-tile tone-green"><span class="mission-tile-icon" aria-hidden="true">🔥</span><span class="help">연속 참여</span>
+            <li class="mission-tile tone-green"><span class="mission-tile-icon" aria-hidden="true"><svg th:replace="~{fragments/icons :: jandi-line}"></svg></span><span class="help">연속 참여</span>
                 <strong th:text="${myStats.streak() + '일'}">0일</strong><span class="help" th:text="${myStats.doneToday() ? '오늘도 이어 갔어요!' : '오늘 쓰면 이어져요'}">오늘도 이어 가요!</span></li>
             <li class="mission-tile tone-orange"><span class="mission-tile-icon" aria-hidden="true">🏅</span><span class="help">받은 배지</span>
                 <strong th:text="${myBadgeCount + '개'}">0개</strong><span class="help" th:text="${myBadgeCount == myBadges.size() ? '다 모았어요!' : '더 모아 보세요!'}">더 모아 보세요!</span></li>

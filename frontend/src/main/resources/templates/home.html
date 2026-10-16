@@ -28,6 +28,20 @@
     <div class="home-layout">
     <div class="home-main">
     <h1 class="visually-hidden">전체 글</h1>
+    <!-- 글그린 = 글 잔디: 로그인한 사람의 최근 16주 잔디와 글쓰기 -->
+    <section th:if="${myGrass != null}" class="grass my-grass" aria-labelledby="my-grass-heading">
+        <h2 id="my-grass-heading" class="grass-title">내 잔디
+            <span class="grass-streak" th:if="${myGrass.currentStreak() > 0}"><svg th:replace="~{fragments/icons :: jandi-line}"></svg> <th:block th:text="${myGrass.currentStreak() + '일 연속'}">3일 연속</th:block></span></h2>
+        <div class="grass-grid" role="img" th:attr="aria-label=${'최근 16주 잔디, 지금 ' + myGrass.currentStreak() + '일 연속'}">
+            <div class="grass-week" th:each="w : ${myGrass.recentWeeks(16)}">
+                <span th:each="d : ${w}" th:class="${'grass-day grass-' + d.level() + (d.mission() ? ' grass-mission' : '')}" th:title="${d.label()}"></span>
+            </div>
+        </div>
+        <form method="post" action="/write" class="inline-form">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit">오늘 한 칸 채우기</button>
+        </form>
+    </section>
     <!-- 086 강성찬 개인 확장: 트렌딩·새로 온 작가·추천은 탐색으로 옮겨 홈은 최신 글 하나 -->
     <!-- 홈은 한 칸(오른쪽 칸 없음). 목록이 끝없이 이어져 꼬리말에 닿기 어려우니 넓은 화면은 사이트 링크를 제목 줄 오른쪽에(좁은 화면은 ☰ 메뉴) -->
     <div class="home-title-row">

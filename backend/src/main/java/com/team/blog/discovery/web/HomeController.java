@@ -1,8 +1,10 @@
 package com.team.blog.discovery.web;
 
+import com.team.blog.discovery.application.ActivityQuery;
 import com.team.blog.post.application.CardPage;
 import com.team.blog.post.application.PostListQuery;
 import com.team.blog.shared.error.PostContentException;
+import com.team.blog.shared.security.CurrentUserProvider;
 import java.time.Clock;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,10 +25,14 @@ public class HomeController {
 
     private final PostListQuery listQuery;
     private final Clock clock;
+    private final ActivityQuery activityQuery;
+    private final CurrentUserProvider currentUserProvider;
 
-    public HomeController(PostListQuery listQuery, Clock clock) {
+    public HomeController(PostListQuery listQuery, Clock clock, ActivityQuery activityQuery, CurrentUserProvider currentUserProvider) {
         this.listQuery = listQuery;
         this.clock = clock;
+        this.activityQuery = activityQuery;
+        this.currentUserProvider = currentUserProvider;
     }
 
     @GetMapping("/")
@@ -47,6 +53,10 @@ public class HomeController {
         model.addAttribute("continued", cursor != null && !cursor.isEmpty());
         model.addAttribute("listApi", "/api/posts");
         model.addAttribute("heroPhoto", HERO_PHOTO);
+        // 글그린 = 글 잔디: 로그인하면 첫 화면 맨 위에 내 잔디 한 줄
+        if (activityQuery.enabled() && (cursor == null || cursor.isEmpty())) {
+            currentUserProvider.current().ifPresent(u -> model.addAttribute("myGrass", activityQuery.grass(u.memberId())));
+        }
         return "home";
     }
 }

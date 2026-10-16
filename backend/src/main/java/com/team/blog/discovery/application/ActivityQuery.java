@@ -22,16 +22,22 @@ public class ActivityQuery {
 
     private static final DateTimeFormatter LABEL = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
-    /** 칸 하나: 날짜, 글 수, 댓글 수, 진하기 0~4. */
-    public record Day(LocalDate date, int posts, int comments, int level) {
+    /** 칸 하나: 날짜, 글 수, 댓글 수, 진하기 0~4, 그날 오늘의 미션을 공개 글로 마쳤는지. */
+    public record Day(LocalDate date, int posts, int comments, int level, boolean mission) {
 
         public String label() {
-            return LABEL.format(date) + (posts + comments == 0 ? " · 기록 없음" : " · 글 " + posts + " · 댓글 " + comments);
+            return LABEL.format(date) + (posts + comments == 0 ? " · 기록 없음" : " · 글 " + posts + " · 댓글 " + comments)
+                    + (mission ? " · 미션 완료" : "");
         }
     }
 
     /** 일요일부터 시작하는 주 53개, 오늘 기준 연속·최고 연속 일수, 1년 기록한 날 수. */
     public record Grass(List<List<Day>> weeks, int currentStreak, int bestStreak, int activeDays) {
+
+        /** 첫 화면 "내 잔디" 한 줄: 최근 n주. */
+        public List<List<Day>> recentWeeks(int n) {
+            return weeks.subList(Math.max(0, weeks.size() - n), weeks.size());
+        }
     }
 
     private final JdbcTemplate jdbc;
@@ -53,20 +59,31 @@ public class ActivityQuery {
         LocalDate today = LocalDate.ofInstant(clock.instant(), zone);
         LocalDate start = today.minusWeeks(52).with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
         Map<LocalDate, int[]> counts = new HashMap<>();
+        java.util.Set<LocalDate> missionDays = new java.util.HashSet<>();
         String tz = properties.zone();
         jdbc.query("""
-                SELECT d, sum(p) AS posts, sum(c) AS comments FROM (
-                  SELECT (p.first_public_at AT TIME ZONE ?)::date AS d, 1 AS p, 0 AS c FROM post p
+                SELECT d, sum(p) AS posts, sum(c) AS comments, sum(m) AS missions FROM (
+                  SELECT (p.first_public_at AT TIME ZONE ?)::date AS d, 1 AS p, 0 AS c, 0 AS m FROM post p
                   WHERE p.author_id = ? AND p.status = 'PUBLISHED' AND p.visibility = 'PUBLIC' AND p.deleted_at IS NULL
                     AND p.hidden_at IS NULL AND p.first_public_at >= ?
                   UNION ALL
-                  SELECT (c.created_at AT TIME ZONE ?)::date, 0, 1 FROM comment c JOIN post p ON p.id = c.post_id
+                  SELECT (c.created_at AT TIME ZONE ?)::date, 0, 1, 0 FROM comment c JOIN post p ON p.id = c.post_id
                   WHERE c.author_id = ? AND c.deleted_at IS NULL AND c.hidden_at IS NULL AND c.created_at >= ?
                     AND p.visibility = 'PUBLIC' AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL AND p.hidden_at IS NULL
+                  UNION ALL
+                  SELECT dt.day, 0, 0, 1 FROM mission_post mp JOIN daily_topic dt ON dt.id = mp.topic_id JOIN post p ON p.id = mp.post_id
+                  WHERE mp.member_id = ? AND mp.completed_at IS NOT NULL AND (mp.completed_at AT TIME ZONE 'Asia/Seoul')::date = dt.day
+                    AND dt.day >= ? AND p.visibility = 'PUBLIC' AND p.status = 'PUBLISHED' AND p.deleted_at IS NULL AND p.hidden_at IS NULL
                 ) t GROUP BY d
                 """, rs -> {
-            counts.put(rs.getDate("d").toLocalDate(), new int[] {rs.getInt("posts"), rs.getInt("comments")});
-        }, tz, memberId, Date.valueOf(start.minusDays(1)), tz, memberId, Date.valueOf(start.minusDays(1)));
+            LocalDate day = rs.getDate("d").toLocalDate();
+            if (rs.getInt("missions") > 0) {
+                missionDays.add(day);
+            }
+            if (rs.getInt("posts") + rs.getInt("comments") > 0) {
+                counts.put(day, new int[] {rs.getInt("posts"), rs.getInt("comments")});
+            }
+        }, tz, memberId, Date.valueOf(start.minusDays(1)), tz, memberId, Date.valueOf(start.minusDays(1)), memberId, Date.valueOf(start));
         List<List<Day>> weeks = new ArrayList<>();
         int active = 0;
         for (LocalDate weekStart = start; !weekStart.isAfter(today); weekStart = weekStart.plusWeeks(1)) {
@@ -82,7 +99,7 @@ public class ActivityQuery {
                 if (total > 0) {
                     active++;
                 }
-                week.add(new Day(d, c[0], c[1], level));
+                week.add(new Day(d, c[0], c[1], level, missionDays.contains(d)));
             }
             weeks.add(week);
         }

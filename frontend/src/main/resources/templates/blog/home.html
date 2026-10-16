@@ -16,12 +16,12 @@
     </section>
     <!-- 031 강성찬 개인 확장: 잔디·스트릭(최근 1년, 공개 글·공개 글 댓글만) -->
     <section th:if="${grass != null}" class="grass" aria-labelledby="grass-heading">
-        <h2 id="grass-heading" class="grass-title">기록
-            <span class="grass-streak" th:if="${grass.currentStreak() > 0}"><svg th:replace="~{fragments/icons :: flame}"></svg> <th:block th:text="${grass.currentStreak() + '일 연속'}">3일 연속</th:block></span>
+        <h2 id="grass-heading" class="grass-title">글 잔디
+            <span class="grass-streak" th:if="${grass.currentStreak() > 0}"><svg th:replace="~{fragments/icons :: jandi-line}"></svg> <th:block th:text="${grass.currentStreak() + '일 연속'}">3일 연속</th:block></span>
             <span class="help" th:text="${'최근 1년 ' + grass.activeDays() + '일 · 최고 ' + grass.bestStreak() + '일 연속'}">최근 1년</span></h2>
         <div class="grass-grid" role="img" th:attr="aria-label=${'최근 1년 동안 ' + grass.activeDays() + '일 기록, 최고 ' + grass.bestStreak() + '일 연속'}">
             <div class="grass-week" th:each="w : ${grass.weeks()}">
-                <span th:each="d : ${w}" th:class="${'grass-day grass-' + d.level()}" th:title="${d.label()}"></span>
+                <span th:each="d : ${w}" th:class="${'grass-day grass-' + d.level() + (d.mission() ? ' grass-mission' : '')}" th:title="${d.label()}"></span>
             </div>
         </div>
     </section>

@@ -15,6 +15,9 @@ h1, h2, h3 { line-height: 1.35; letter-spacing: -0.01em; }
 .header-inner { position: relative; max-width: var(--page-wide); margin: 0 auto; padding: 12px 20px; display: flex; gap: 24px; align-items: center; }
 .brand { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; font-size: 1.15em; color: var(--color-text); text-decoration: none; flex: none; }
 .brand .icon-paw, .footer-brand .icon-paw, .hero-slogan .icon-paw { color: var(--color-accent); }
+/* 글그린 = 글 잔디 로고: 칸 네 개가 점점 진해짐 */
+.jandi-1 { fill: var(--color-grass-1); } .jandi-2 { fill: var(--color-grass-2); }
+.jandi-3 { fill: var(--color-grass-3); } .jandi-4 { fill: var(--color-grass-4); }
 .site-nav { flex: 1; display: flex; gap: 12px; align-items: center; min-width: 0; }
 .site-menu { flex: 1; display: flex; gap: 12px; align-items: center; justify-content: space-between; min-width: 0; }
 .menu-main, .menu-account { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
@@ -612,6 +615,14 @@ html, body { overflow-x: clip; }
 .grass-day { width: 100%; aspect-ratio: 1; border-radius: 3px; background: var(--color-grass-0); }
 .grass-1 { background: var(--color-grass-1); } .grass-2 { background: var(--color-grass-2); }
 .grass-3 { background: var(--color-grass-3); } .grass-4 { background: var(--color-grass-4); }
+/* 오늘의 미션을 마친 날: 칸 가운데 점 */
+.grass-mission { position: relative; }
+.grass-mission::after { content: ""; position: absolute; inset: 30%; border-radius: 50%; background: var(--color-accent); }
+/* 첫 화면 내 잔디 한 줄(로그인) */
+.my-grass { display: flex; align-items: center; gap: 12px 18px; flex-wrap: wrap; }
+.my-grass .grass-title { margin: 0; }
+.my-grass .grass-grid { flex: 1 1 260px; min-width: 0; }
+.my-grass .grass-week { min-width: 8px; max-width: 16px; }
 /* 032 작성자 통계(강성찬 개인 확장): 막대 높이는 서버가 정한 % (style 속성, 색은 역할) */
 main.stats-page { max-width: 900px; }
 .stats-totals { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; }
@@ -1091,11 +1102,13 @@ main.list-page .home-cards { gap: 18px; }
 .mission-today-state { margin: 14px 0 0; font-weight: 600; font-size: .92em; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
 .mission-today-state.is-done { align-self: flex-start; background: var(--color-brand-soft); padding: 8px 14px; border-radius: 12px; }
 .mission-today-state a { color: var(--color-brand); }
-.streak-chip { padding: 2px 10px; border-radius: 999px; background: var(--tone-orange-bg); color: var(--color-text); font-size: .9em; }
+.streak-chip { padding: 2px 10px; border-radius: 999px; background: var(--tone-green-bg); color: var(--color-text); font-size: .9em; }
+.streak-chip .icon { width: 1em; height: 1em; vertical-align: -0.14em; color: var(--tone-green-fg); }
 .mission-tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .mission-tile { background: var(--tone-bg); border-radius: 16px; padding: 14px 12px; min-width: 104px; text-align: center;
     display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .mission-tile-icon { font-size: 1.4em; line-height: 1.2; }
+.mission-tile-icon .icon { width: 1em; height: 1em; color: var(--tone-green-fg); }
 .mission-tile strong { font-size: 1.6em; line-height: 1.3; }
 .mission-tile .help { font-size: .8em; }
 .mission-hero-art { display: none; position: relative; align-self: stretch; }

@@ -42,6 +42,28 @@ class ActivityIT extends IntegrationTestBase {
         assertThat(grass.activeDays()).isEqualTo(4);
         assertThat(grass.weeks()).hasSizeBetween(52, 54);
         String html = mockMvc.perform(get("/grassme")).andReturn().getResponse().getContentAsString();
-        assertThat(html).contains("3일 연속").contains("최근 1년 4일").contains("2026.10.09 · 글 1 · 댓글 0");
+        assertThat(html).contains("글 잔디").contains("3일 연속").contains("최근 1년 4일").contains("2026.10.09 · 글 1 · 댓글 0");
+    }
+
+    @Test
+    void missionDoneDayIsMarkedOnlyForPublicPost() {
+        clock.set(NOW);
+        long me = members.localMember("grassmi", "grassmi", "grassmi@example.com", "Blog#2026ok", true);
+        long open = posts.published(me, "미션 글", "본문", 1, NOW.minus(Duration.ofHours(1)));
+        long closed = posts.published(me, "비공개 미션 글", "본문", 1, NOW.minus(Duration.ofDays(1)));
+        jdbc.update("UPDATE post SET visibility = 'PRIVATE', first_public_at = NULL WHERE id = ?", closed);
+        mission(me, open, "2026-10-09", NOW.minus(Duration.ofHours(1)));
+        mission(me, closed, "2026-10-08", NOW.minus(Duration.ofDays(1)));
+        java.util.Map<String, Boolean> marks = new java.util.HashMap<>();
+        activity.grass(me).weeks().forEach(w -> w.forEach(d -> marks.put(d.date().toString(), d.mission())));
+        assertThat(marks).containsEntry("2026-10-09", true).containsEntry("2026-10-08", false);
+    }
+
+    private void mission(long member, long post, String day, Instant completedAt) {
+        Long topic = jdbc.queryForObject("""
+                INSERT INTO daily_topic (day, slot, title, hint, source) VALUES (?::date, 1, '주제', '힌트', 'POOL')
+                ON CONFLICT (day, slot) DO UPDATE SET title = EXCLUDED.title RETURNING id""", Long.class, day);
+        jdbc.update("INSERT INTO mission_post (topic_id, member_id, post_id, completed_at) VALUES (?, ?, ?, ?)",
+                topic, member, post, Timestamp.from(completedAt));
     }
 }
