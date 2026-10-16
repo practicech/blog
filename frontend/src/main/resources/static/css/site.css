@@ -1543,7 +1543,11 @@ a.link-btn.back::before { content: "‹"; font-size: 1.2em; line-height: 1; colo
 /* 104 후속(chan "가로가 큰 느낌"): 카드는 velog처럼 폭 250~300px. 들어가는 만큼 칸을 채워 넓은 화면은 칸 수가 늘고(4칸 고정이 아님),
    카드가 넓게 늘어나지 않는다. 휴대폰(한 칸이 250px 안 될 때)은 한 칸. 글 아래 관련 글(2칸)은 그대로 */
 main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) {
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); }
+    grid-template-columns: minmax(0, 1fr); }
+/* 10-16 chan "옆으로 늘려서 카드 4개": 넓은 화면은 한 줄 4개로 고정(5개째 없음), 좁아지면 3·2·1개 */
+@media (min-width: 600px) { main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 900px) { main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1200px) { main.list-page .card-grid:not(.related-cards), main.list-page:not(.search-page) .card-grid:not(.related-cards) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 /* 106 강성찬 개인 확장: 내 글 관리 [시리즈] 탭 */
 .series-pick { border: 0; padding: 0; margin: 12px 0; display: grid; gap: 6px; max-height: 280px; overflow-y: auto; }
@@ -1588,7 +1592,7 @@ dialog.publish-panel .cover-choice:has(> span) { width: auto; min-width: 88px; p
 .series-new-row { align-items: center; }
 
 /* 103 후속(10-16 chan "4줄로"): 사진 카드 요약은 4줄 + …(사진 16:10은 그대로). 사진 없는 카드는 그대로(같은 줄 높이만큼 채움) */
-.card-grid .post-card:has(.card-thumb) .card-excerpt { -webkit-line-clamp: 4; line-clamp: 4; }
+.card-grid .post-card:has(.card-thumb) .card-excerpt { -webkit-line-clamp: 3; line-clamp: 3; } /* 10-16 오후 chan "3줄 정도": 4 → 3 */
 
 /* 109 강성찬 개인 확장: 내 글 여러 개 골라 한 번에. 스크립트가 켜졌을 때만(.bulk-on) 체크 칸이 보인다 */
 .row-check { display: none; flex: none; margin: 0; }
@@ -1778,4 +1782,10 @@ a.pager-num:hover, a.pager-step:hover { background: var(--color-surface-muted); 
 .pager-step.is-off { color: var(--color-text-muted); opacity: .45; }
 .pager-gap { min-width: 20px; text-align: center; color: var(--color-text-muted); }
 @media (max-width: 560px) { .pager-far { display: none; } }
+
+/* 10-16 chan "상하 줄여줘": 목록 카드는 안쪽 여백과 줄 사이를 좁힌다(사진 16:10은 그대로, 같은 줄 카드 높이는 card-rows.js가 맞춤) */
+.card-grid .post-card { padding: 12px 16px 10px; gap: 6px; }
+.card-grid .post-card > .card-thumb { margin: -12px -16px 2px; }
+.card-grid .card-body { gap: 4px; }
+.card-grid .card-top { margin: 0; min-height: 24px; }
 
