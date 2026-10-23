@@ -218,6 +218,20 @@ class NotificationIT extends IntegrationTestBase {
     }
 
     @Test
+    void handleChangeNotifiesFollowersWithOldAndNewAddress() throws Exception {
+        clock.set(T);
+        long me = member("ntoldname");
+        long f = member("ntfan");
+        long stranger = member("ntstranger");
+        jdbc.update("INSERT INTO follow (follower_id, followee_id) VALUES (?, ?)", f, me);
+        mockMvc.perform(put("/api/me/handle").with(csrf()).with(TestAuth.member(me))
+                .contentType(MediaType.APPLICATION_JSON).content("{\"handle\":\"ntnewname\"}")).andExpect(status().isOk());
+        assertThat(list(f)).contains("님이 블로그 주소를 바꿨어요: ntoldname → ntnewname", "\"url\":\"/ntnewname\"");
+        assertThat(rows(stranger)).isEmpty();
+        assertThat(rows(me)).isEmpty();
+    }
+
+    @Test
     void followGroupDedupesWithinSevenDays() {
         clock.set(T);
         long a = member("ntfollow");

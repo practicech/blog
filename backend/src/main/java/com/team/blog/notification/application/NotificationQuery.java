@@ -77,7 +77,7 @@ public class NotificationQuery {
     private List<NotificationItem> select(CurrentUser user, String where, List<Object> args) {
         Instant now = clock.instant();
         return jdbc.query("""
-                SELECT n.id, n.type, n.read_at, n.updated_at, n.actor_count, n.result, n.post_id, n.comment_id, n.inquiry_id, n.club_id, wc.name AS club_name,
+                SELECT n.id, n.type, n.read_at, n.updated_at, n.actor_count, n.result, n.post_id, n.comment_id, n.inquiry_id, n.club_id, wc.name AS club_name, n.old_handle,
                        a.handle AS a_handle, a.nickname AS a_nickname, a.profile_image_url AS a_picture, a.withdrawn_at AS a_withdrawn,
                        n.last_actor_id,
                        p.title, p.status, p.visibility, p.author_id, p.deleted_at AS p_deleted, p.hidden_at AS p_hidden,
@@ -181,6 +181,9 @@ public class NotificationQuery {
                     "/missions/clubs/" + rs.getLong("club_id"));
             case CLUB_REQUEST -> new Body(null, null, actorName + "님이 함께 쓰기 「" + rs.getString("club_name") + "」에 참여를 요청했어요",
                     "/missions/clubs/" + rs.getLong("club_id"));
+            case HANDLE_CHANGED -> new Body(null, null, actorName + "님이 블로그 주소를 바꿨어요: "
+                    + rs.getString("old_handle") + " → " + rs.getString("a_handle"),
+                    rs.getString("a_handle") == null ? null : com.team.blog.shared.web.BlogPaths.of(rs.getString("a_handle")));
             case REPORT_RESOLVED -> new Body(null, null, "ACTION_TAKEN".equals(rs.getString("result"))
                     ? "신고하신 내용을 검토해 조치했어요. 알려 주셔서 고마워요"
                     : "신고하신 내용을 검토했지만 운영 정책 위반은 아니었어요", null);

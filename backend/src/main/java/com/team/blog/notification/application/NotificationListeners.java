@@ -8,6 +8,7 @@ import com.team.blog.shared.event.FollowRequestClosed;
 import com.team.blog.shared.event.CommentLiked;
 import com.team.blog.shared.event.CommentUnliked;
 import com.team.blog.shared.event.FollowRequested;
+import com.team.blog.shared.event.HandleChanged;
 import com.team.blog.shared.event.InquiryReceived;
 import com.team.blog.shared.event.InquiryReplied;
 import com.team.blog.shared.event.MemberFollowed;
@@ -109,6 +110,12 @@ public class NotificationListeners {
     public void on(ClubNotice e) {
         dispatcher.submit("club " + e.clubId() + " " + e.receiverId(), () -> writer.club(e.receiverId(),
                 e.invite() ? NotificationType.CLUB_INVITE : NotificationType.CLUB_REQUEST, e.clubId(), e.actorId()));
+    }
+
+    /** 강성찬 개인 확장: 블로그 주소 변경 → 팔로워에게. */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
+    public void on(HandleChanged e) {
+        dispatcher.submit("handle changed " + e.memberId(), () -> writer.handleChanged(e.memberId(), e.oldHandle()));
     }
 
     /** 057 강성찬 개인 확장: 오늘의 미션 글 → 친구에게. */

@@ -15,6 +15,8 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import com.team.blog.shared.event.HandleChanged;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -55,9 +57,12 @@ public class HandleChangeService {
     private final JdbcTemplate jdbc;
     private final InstaAccountProperties properties;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
     public HandleChangeService(MemberRepository memberRepository, AuthIdentityRepository identities,
-                               HandleService handleService, JdbcTemplate jdbc, InstaAccountProperties properties, Clock clock) {
+                               HandleService handleService, JdbcTemplate jdbc, InstaAccountProperties properties, Clock clock,
+                               ApplicationEventPublisher events) {
+        this.events = events;
         this.identities = identities;
         this.memberRepository = memberRepository;
         this.handleService = handleService;
@@ -105,6 +110,7 @@ public class HandleChangeService {
         } catch (DuplicateKeyException e) {
             throw new HandleViolationException(HandleViolation.HANDLE_DUPLICATE);
         }
+        events.publishEvent(new HandleChanged(memberId, current));
         return handle.toString();
     }
 

@@ -138,6 +138,20 @@ public class NotificationWriter {
         return true;
     }
 
+    /** 주소 변경: 팔로워 모두에게 한 건씩(새 글 알림처럼 한 번에). */
+    public int handleChanged(long memberId, String oldHandle) {
+        if (member(memberId).map(MemberState::withdrawn).orElse(true)) {
+            return 0;
+        }
+        Timestamp now = now();
+        return jdbc.update("""
+                INSERT INTO notification (receiver_id, type, old_handle, last_actor_id, actor_count, created_at, updated_at)
+                SELECT f.follower_id, 'HANDLE_CHANGED', ?, ?, 1, ?, ?
+                FROM follow f JOIN member r ON r.id = f.follower_id
+                WHERE f.followee_id = ? AND r.withdrawn_at IS NULL
+                """, oldHandle, memberId, now, now, memberId);
+    }
+
     public static String likeGroup(long postId) {
         return "LIKE:post:" + postId;
     }
