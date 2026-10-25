@@ -18,7 +18,8 @@
           method: 'POST', credentials: 'same-origin',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body
         }).then(function (res) {
-          if (!res.ok) { throw new Error(); }
+          // 저장되면 서버가 /settings로 돌려보낸다. 로그인이 풀려 /login으로 갔으면 저장 안 된 것
+          if (!res.ok || (res.redirected && new URL(res.url).pathname !== '/settings')) { throw new Error(); }
           if (status) { status.dataset.toast = 'success'; status.textContent = ''; status.textContent = '저장했어요'; }
         }).catch(function () {
           if (button) { button.hidden = false; }
