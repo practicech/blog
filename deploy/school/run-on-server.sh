@@ -169,7 +169,7 @@ check_telegram() {
   esac
 }
 
-# 우리 전용 Nginx: 공용 Nginx → 127.0.0.1:APP_PORT → 앱 두 대. 호스트 네트워크라 앱 포트(127.0.0.1)를 그대로 본다
+# 우리 전용 Nginx: 공용 Nginx → 서버IP:APP_PORT → 앱 두 대. 호스트 네트워크라 앱 포트(127.0.0.1)를 그대로 본다
 start_proxy() {
   # 바인드한 파일을 같은 inode로 덮어써야 컨테이너가 새 내용을 본다(mv 금지)
   cat > "${WORK}/proxy.conf" <<CONF
@@ -184,7 +184,8 @@ upstream app {
     keepalive 16;
 }
 server {
-    listen 127.0.0.1:${APP_PORT};
+    # 공용 Nginx(nginx-manager, 11-03~)가 127.0.0.1이 아니라 서버 IP(10.x)로 들어오므로 모든 주소에서 받는다
+    listen ${APP_PORT};
     client_max_body_size 20M;
     server_tokens off;
     location / {
