@@ -209,6 +209,10 @@ server {
 CONF
   if ${DOCKER} ps --format '{{.Names}}' | grep -qx "${PROXY}"; then
     ${DOCKER} exec "${PROXY}" nginx -s reload > /dev/null
+    # reload로는 127.0.0.1:포트 → 모든 주소:포트로 못 바꾼다(같은 포트 bind 충돌). 아직 127.0.0.1만 쥐고 있으면 한 번 다시 켠다
+    if ss -ltnH "sport = :${APP_PORT}" | grep -q "127.0.0.1:${APP_PORT}"; then
+      ${DOCKER} restart "${PROXY}" > /dev/null
+    fi
     return
   fi
   ${DOCKER} rm -f "${PROXY}" > /dev/null 2>&1 || true
